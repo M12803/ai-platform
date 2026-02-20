@@ -1,0 +1,37 @@
+[Unit]
+Description=AI Platform - On-Premise LLM Management Service
+Documentation=https://github.com/your-org/ai-platform
+After=network.target
+Wants=network.target
+
+[Service]
+Type=exec
+User=aiplatform
+Group=aiplatform
+WorkingDirectory=/opt/ai_platform
+Environment="PATH=/opt/ai_platform/venv/bin"
+ExecStart=/opt/ai_platform/venv/bin/uvicorn app.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 1 \
+    --log-level info \
+    --no-access-log
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/ai_platform/logs /opt/ai_platform/models
+
+# Resource limits – tune for your hardware
+LimitNOFILE=65535
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
